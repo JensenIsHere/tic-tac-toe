@@ -38,7 +38,6 @@ play against the computer!
 
 const gameboard = (() => {
   let board = Array.from(' '.repeat(9));
-  board = ['X', 'O', 'X', 'O', 'X', 'O', 'X', 'O', 'X']
   const display = () => board;
 
   const renderSquare = (pos) => {
@@ -61,16 +60,16 @@ const gameboard = (() => {
     if (board[pos] == " " && pos > -1 && pos < 9) {
       board[pos] = token;
       renderSquare(pos);
-      return pos;
+      return checkForWinner();
     }
     else
       return -1;
   }
 
   const checkForWinner = () => {
-
+    return false;
   }
-  return {display, renderBoard, clearBoard, placeToken, checkForWinner};
+  return {display, renderBoard, clearBoard, placeToken};
 })();
 
 const Player = (playerName, playerToken) => {
@@ -85,5 +84,26 @@ const Player = (playerName, playerToken) => {
 }
 
 const gameController = (() => {
-
+  let player1 = Player("Jensen", "X");
+  let player2 = Player("Computer", "O");
+  let currentPlayer = player1;
+  const gameTurn = (pos) => {
+    console.log(currentPlayer.token() + " " + pos);
+    if (gameboard.placeToken(currentPlayer.token(), pos) > -1)
+      currentPlayer.name() == player1.name() ? currentPlayer = player2 :
+        currentPlayer = player1;
+  }
+  const whosTurn = () => currentPlayer.name();
+  return {gameTurn, whosTurn}
 })();
+
+document.addEventListener('click', function(e) {
+  console.log(e);
+  if (e.target.dataset.pos > -1) {
+    gameController.gameTurn(e.target.dataset.pos);
+    console.log(e.target.dataset.pos);
+    console.log(gameController.whosTurn());
+  }
+  else
+    console.log("Missed!");
+});
