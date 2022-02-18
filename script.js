@@ -35,3 +35,55 @@ play against the computer!
   c.) If you get this running definitely come show it off in the chatroom. It’s 
       quite an accomplishment!
 */
+
+const gameboard = (() => {
+  let board = Array.from(' '.repeat(9));
+  board = ['X', 'O', 'X', 'O', 'X', 'O', 'X', 'O', 'X']
+  const display = () => board;
+
+  const renderSquare = (pos) => {
+    document.querySelector("div[data-pos='" + pos + "']").innerHTML = 
+      board[pos];
+  }
+
+  const renderBoard = () => {
+    for (let i = 0; i < 9; i++) 
+      renderSquare(i);
+  }
+
+  const clearBoard = () => {
+    board = Array.from(' '.repeat(9));
+    for (let i = 0; i < 9; i++)
+      renderSquare(i);
+  }
+
+  const placeToken = (token, pos) => {
+    if (board[pos] == " " && pos > -1 && pos < 9) {
+      board[pos] = token;
+      renderSquare(pos);
+      return pos;
+    }
+    else
+      return -1;
+  }
+
+  const checkForWinner = () => {
+
+  }
+  return {display, renderBoard, clearBoard, placeToken, checkForWinner};
+})();
+
+const Player = (playerName, playerToken) => {
+  let currentPoints = 0
+  const name = () => playerName;
+  const token = () => playerToken;
+  const points = () => currentPoints;
+  const addPoint = () => {
+    currentPoints += 1;
+  }
+  return {name, token, points, addPoint};
+}
+
+const gameController = (() => {
+
+})();
