@@ -52,58 +52,136 @@ const gameboard = (() => {
 
   const clearBoard = () => {
     board = Array.from(' '.repeat(9));
-    for (let i = 0; i < 9; i++)
-      renderSquare(i);
+    renderBoard();
+  }
+
+  const enableBoard = () => {
+    for (i = 0; i < 9; i++)
+      document.querySelector("div[data-pos='" + i + "']").dataset.game_on 
+        = "yes";
+  }
+
+  const disableBoard = () => {
+    for (i = 0; i < 9; i++)
+      document.querySelector("div[data-pos='" + i + "']").dataset.game_on 
+        = "no";
   }
 
   const placeToken = (token, pos) => {
     if (board[pos] == " " && pos > -1 && pos < 9) {
       board[pos] = token;
       renderSquare(pos);
-      return checkForWinner();
+      return pos;
     }
     else
       return -1;
   }
 
-  const checkForWinner = () => {
+  const checkWin = (token) => {
+    let winPossibilities = [
+      [0, 1, 2],
+      [3, 4, 5], 
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+    let win;
+    for (let i = 0; i < winPossibilities.length; i++) {
+      win = true;
+      for (let j = 0; j < 3; j++) {
+        if (board[winPossibilities[i][j]] != token) {
+          win = false;
+          break;
+        }
+      }
+      if (win == true) {
+        return true;
+      }
+    }
     return false;
   }
-  return {display, renderBoard, clearBoard, placeToken};
+
+  const checkDraw = () => {
+    console.log("Draw = " + (gameboard.display().indexOf(' ') == -1 ? true 
+      : false));
+    return gameboard.display().indexOf(' ') == -1 ? true : false;
+  }
+
+  return {display, renderBoard, clearBoard, enableBoard, disableBoard, 
+    placeToken, checkWin, checkDraw};
 })();
 
 const Player = (playerName, playerToken) => {
-  let currentPoints = 0
   const name = () => playerName;
   const token = () => playerToken;
-  const points = () => currentPoints;
-  const addPoint = () => {
-    currentPoints += 1;
-  }
-  return {name, token, points, addPoint};
+
+  return {name, token};
 }
 
 const gameController = (() => {
   let player1 = Player("Jensen", "X");
   let player2 = Player("Computer", "O");
   let currentPlayer = player1;
+
   const gameTurn = (pos) => {
-    console.log(currentPlayer.token() + " " + pos);
-    if (gameboard.placeToken(currentPlayer.token(), pos) > -1)
-      currentPlayer.name() == player1.name() ? currentPlayer = player2 :
-        currentPlayer = player1;
+    console.log(pos);
+    let success = gameboard.placeToken(currentPlayer.token(), pos);
+    console.log(pos + ", " + success);
+    if (success > -1) {
+      console.log(currentPlayer.token());
+      switch (gameOver()) {
+        case true:
+          endOfGame(currentPlayer.name() + " wins!")
+          break;
+        case "D":
+          endOfGame("It's a cat's game!")
+          break;
+        default:
+          currentPlayer.name() == player1.name() ? currentPlayer = player2 :
+            currentPlayer = player1;
+      }
+    }
   }
+
   const whosTurn = () => currentPlayer.name();
-  return {gameTurn, whosTurn}
+
+  const gameOver = () => {
+    if (gameboard.checkWin(currentPlayer.token()) == true)
+      return true;
+    else if (gameboard.checkDraw() == true)
+      return "D";
+    else 
+      return false;
+  }
+
+  const endOfGame = (message) => {
+    console.log(message);
+    gameboard.disableBoard();
+  }
+
+  const resetGame = () => {
+    gameboard.clearBoard();
+    gameboard.enableBoard();
+    currentPlayer = player1;
+  }
+
+  return {gameTurn, whosTurn, resetGame}
 })();
 
 document.addEventListener('click', function(e) {
   console.log(e);
-  if (e.target.dataset.pos > -1) {
-    gameController.gameTurn(e.target.dataset.pos);
+  if (e.target.dataset.pos > -1 && e.target.dataset.game_on == "yes") {
     console.log(e.target.dataset.pos);
-    console.log(gameController.whosTurn());
+    gameController.gameTurn(e.target.dataset.pos);
+  }
+  else if (e.target.className == 'reset') {
+    gameController.resetGame();
   }
   else
     console.log("Missed!");
 });
+
+gameboard.enableBoard();

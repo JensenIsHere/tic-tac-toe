@@ -9,16 +9,31 @@
 </head>
 <body>
   <h2>Odin Tic-Tac-Toe</h2>
-  <div id="gameboard">
-    <div data-pos = "0"></div>
-    <div data-pos = "1"></div>
-    <div data-pos = "2"></div>
-    <div data-pos = "3"></div>
-    <div data-pos = "4"></div>
-    <div data-pos = "5"></div>
-    <div data-pos = "6"></div>
-    <div data-pos = "7"></div>
-    <div data-pos = "8"></div>
+  <div class="center_board">
+    <div id="gameboard">
+      <div data-pos = "0"></div>
+      <div data-pos = "1"></div>
+      <div data-pos = "2"></div>
+      <div data-pos = "3"></div>
+      <div data-pos = "4"></div>
+      <div data-pos = "5"></div>
+      <div data-pos = "6"></div>
+      <div data-pos = "7"></div>
+      <div data-pos = "8"></div>
+    </div>
+  </div>
+  <div class="button_area">
+    <button type="button" class="reset">Reset</button>
+    <ul>
+      <li>
+        <label for="player1">Player 1:</label>
+        <input type="text" name="player1" id="player1">
+      </li>
+      <li>
+        <label for="player2">Player 2:</label>
+        <input type="text" name="player2" id="player2">
+      </li>
+    </ul>
   </div>
   <script src="./script.js"></script>
 </body>
