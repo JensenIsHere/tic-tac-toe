@@ -8,7 +8,7 @@
   <title>Odin Tic-Tac-Toe</title>
 </head>
 <body>
-  <h2>Odin Tic-Tac-Toe</h2>
+  <h2>Responsive Tic-Tac-Toe</h2>
   <div class="center_board">
     <div id="gameboard">
       <div data-pos = "0"></div>
@@ -22,18 +22,21 @@
       <div data-pos = "8"></div>
     </div>
   </div>
+  <p>Please enter your names, then press "Start"</p>
   <div class="button_area">
-    <button type="button" class="reset">Reset</button>
     <ul>
       <li>
-        <label for="player1">Player 1:</label>
+        <label for="player1">Player 1 (X):</label>
         <input type="text" name="player1" id="player1">
       </li>
       <li>
-        <label for="player2">Player 2:</label>
+        <label for="player2">Player 2 (O):</label>
         <input type="text" name="player2" id="player2">
       </li>
     </ul>
+  </div>
+  <div class="button_area">
+    <button type="button" class="start">Start</button>
   </div>
   <script src="./script.js"></script>
 </body>

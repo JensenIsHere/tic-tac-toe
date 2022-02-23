@@ -38,11 +38,12 @@ play against the computer!
 
 const gameboard = (() => {
   let board = Array.from(' '.repeat(9));
-  const display = () => board;
+
+  const targetSquare = (pos) => document.querySelector("div[data-pos='" 
+    + pos + "']");
 
   const renderSquare = (pos) => {
-    document.querySelector("div[data-pos='" + pos + "']").innerHTML = 
-      board[pos];
+    targetSquare(pos).innerHTML = board[pos];
   }
 
   const renderBoard = () => {
@@ -53,17 +54,21 @@ const gameboard = (() => {
   const clearBoard = () => {
     board = Array.from(' '.repeat(9));
     renderBoard();
+    for (let i = 0; i < 9; i++) {
+      delete targetSquare(i).dataset.token;
+      delete targetSquare(i).dataset.win;
+    }
   }
 
   const enableBoard = () => {
     for (i = 0; i < 9; i++)
-      document.querySelector("div[data-pos='" + i + "']").dataset.game_on 
+      targetSquare(i).dataset.game_on 
         = "yes";
   }
 
   const disableBoard = () => {
     for (i = 0; i < 9; i++)
-      document.querySelector("div[data-pos='" + i + "']").dataset.game_on 
+      targetSquare(i).dataset.game_on 
         = "no";
   }
 
@@ -71,6 +76,7 @@ const gameboard = (() => {
     if (board[pos] == " " && pos > -1 && pos < 9) {
       board[pos] = token;
       renderSquare(pos);
+      targetSquare(pos).dataset.token = token;
       return pos;
     }
     else
@@ -98,23 +104,25 @@ const gameboard = (() => {
         }
       }
       if (win == true) {
-        return true;
+        return winPossibilities[i];
       }
     }
     return false;
   }
 
-  const checkDraw = () => {
-    console.log("Draw = " + (gameboard.display().indexOf(' ') == -1 ? true 
-      : false));
-    return gameboard.display().indexOf(' ') == -1 ? true : false;
+  const checkDraw = () => board.indexOf(' ') == -1 ? true : false;
+
+  const colorWinner = (squares, token) => {
+    squares.forEach(element => {
+      targetSquare(element).dataset.win = token; 
+    });
   }
 
-  return {display, renderBoard, clearBoard, enableBoard, disableBoard, 
-    placeToken, checkWin, checkDraw};
+  return {clearBoard, enableBoard, disableBoard, placeToken, checkWin, 
+    checkDraw, colorWinner};
 })();
 
-const Player = (playerName, playerToken) => {
+const Player = (playerName = "Bob", playerToken) => {
   const name = () => playerName;
   const token = () => playerToken;
 
@@ -122,44 +130,63 @@ const Player = (playerName, playerToken) => {
 }
 
 const gameController = (() => {
-  let player1 = Player("Jensen", "X");
-  let player2 = Player("Computer", "O");
-  let currentPlayer = player1;
+  let player1;
+  let player2;
+  let currentPlayer;
 
   const gameTurn = (pos) => {
-    console.log(pos);
-    let success = gameboard.placeToken(currentPlayer.token(), pos);
-    console.log(pos + ", " + success);
-    if (success > -1) {
-      console.log(currentPlayer.token());
-      switch (gameOver()) {
-        case true:
-          endOfGame(currentPlayer.name() + " wins!")
-          break;
-        case "D":
-          endOfGame("It's a cat's game!")
-          break;
-        default:
-          currentPlayer.name() == player1.name() ? currentPlayer = player2 :
-            currentPlayer = player1;
-      }
+    if (gameboard.placeToken(currentPlayer.token(), pos) > -1) {
+      if (gameOver() == false) {
+        currentPlayer.name() == player1.name() ? currentPlayer = player2 :
+          currentPlayer = player1;
+        setMessage(currentPlayer.name() + "\'s turn");
+      }  
     }
   }
 
-  const whosTurn = () => currentPlayer.name();
-
   const gameOver = () => {
-    if (gameboard.checkWin(currentPlayer.token()) == true)
+    win = gameboard.checkWin(currentPlayer.token())
+    if (win != false) {
+      gameboard.disableBoard();
+      gameboard.colorWinner(win, currentPlayer.token());
+      toggleInputs();
+      setMessage(currentPlayer.name() + " wins!");
       return true;
-    else if (gameboard.checkDraw() == true)
-      return "D";
+    }
+    else if (gameboard.checkDraw() == true) {
+      gameboard.disableBoard();
+      toggleInputs();
+      setMessage("It's a cat's game!");
+      return true;
+    }
     else 
       return false;
   }
 
-  const endOfGame = (message) => {
-    console.log(message);
-    gameboard.disableBoard();
+  const setMessage = (message) => {
+    document.querySelector('p').innerText = message;
+  }
+
+  const toggleInputs = () => {
+    target = Array.from(document.getElementsByClassName('button_area'));
+    target.forEach(element => {
+      element.style.display == 'none' ? element.style.display = 'flex' :
+        element.style.display = 'none';
+    });
+  }
+
+  const startGame = () => {
+    player1 = Player(grabName(1), 'X');
+    player2 = Player(grabName(2), 'O');
+    toggleInputs();
+    resetGame();
+    setMessage(currentPlayer.name() + "\'s turn");
+  }
+
+  const grabName = (player) => {
+    return document.querySelector('input#player' + player).value != "" ?
+      document.querySelector('input#player' + player).value : "Someone " 
+      + player;
   }
 
   const resetGame = () => {
@@ -168,20 +195,13 @@ const gameController = (() => {
     currentPlayer = player1;
   }
 
-  return {gameTurn, whosTurn, resetGame}
+  return {gameTurn, startGame}
 })();
 
 document.addEventListener('click', function(e) {
-  console.log(e);
   if (e.target.dataset.pos > -1 && e.target.dataset.game_on == "yes") {
-    console.log(e.target.dataset.pos);
     gameController.gameTurn(e.target.dataset.pos);
   }
-  else if (e.target.className == 'reset') {
-    gameController.resetGame();
-  }
-  else
-    console.log("Missed!");
+  else if (e.target.className == 'start')
+    gameController.startGame();
 });
-
-gameboard.enableBoard();

@@ -18,33 +18,93 @@ h2 {
 #gameboard {
   display: grid;
   grid: repeat(3, clamp(80px, 20vw, 150px)) / repeat(3, clamp(80px, 20vw, 150px));
+  overflow: hidden;
 }
 
-#gameboard > div {
-  border: 2px solid black;
-  margin: -1px;
+#gameboard div:last-child {
+  grid-area: 3/3;
+}
+
+#gameboard>div {
+  outline: 4px solid #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(5rem, 20vw, 9.5rem);
+  font-size: clamp(5rem, 20vw, 9.4rem);
+  text-shadow: 2px 2px 3px #aaa;
+  transition-property: background-color;
+  transition-duration: 0.25s;
+}
+
+#gameboard>div[data-token='X']{
+  color: rgb(238, 106, 45);
+}
+
+#gameboard>div[data-token='O']{
+  color: rgb(97, 184, 255);
+}
+
+#gameboard>div[data-win='yes']{
+  background-color:#ccc;
+  
 }
 
 #gameboard > div:hover[data-game_on = "yes"] {
-  background-color: #ddd;
-  transition-property: background-color;
-  transition-duration: 0.25s;
+  background-color: #ccc;
+}
+
+#gameboard > div[data-win='X'] {
+  background-color: rgb(235, 182, 158);
+  transition-duration: 2s;
+}
+
+#gameboard > div[data-win='O'] {
+  background-color: rgb(172, 217, 255);
+  transition-duration: 2s;
+}
+
+p {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0;
+  font-size: clamp(1rem, 4vw, 1.88rem);
 }
 
 .button_area {
   display: flex;
   justify-content: center;
-  margin-top: 40px;
+  margin-top: 0;
 }
 
 ul {
   list-style-type: none;
+  padding-inline-start: 5px;
+  margin: 10px 0;
 }
 
 ul > li {
   margin: 10px 0;
+}
+
+ul > li > button{
+  margin: 0;
+}
+
+button {
+  width: clamp(80px, 20vw, 150px);
+  height: clamp(45px, 9vw, 67.5px);
+  font-size: clamp(1.7rem, 6vw, 2.81rem);
+}
+
+label {
+  display: inline-block;
+  width: clamp(70px, 17.8vw, 130px);
+  text-align: right;
+  font-size: clamp(.75rem, 3vw, 1.4rem);
+  padding: 5px;
+}
+
+input[type='text'] {
+  font-size: clamp(.75rem, 3vw, 1.4rem);
+  width: clamp(150px, 37.5vw, 280px);
 }
