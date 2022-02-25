@@ -91,11 +91,100 @@ const gameboard = (() => {
 })();
 
 const Player = (playerName, playerToken, playerType) => {
-  const name = () => playerName;
-  const token = () => playerToken;
-  const isHuman = () => playerType
+  const name = playerName;
+  const token = playerToken;
+  const isComputer = playerType;
 
-  return {name, token, isHuman};
+  const switchPlayer = (passToken) => passToken == 'X' ? 'O' : 'X';
+
+  const randomMove = (board) => {
+    let availableMoves = possibleMoves(board);
+    return availableMoves[Math.floor(Math.random()*availableMoves.length)];
+  }
+
+  const minMax = (board, currentPlayer, depth, isMax) => {
+    let scores = [];
+    let tempBoard;
+    let results;
+    let i = 0;
+    let availableMoves = possibleMoves(board);
+
+    while (i < availableMoves.length) {
+      tempBoard = [...board];
+      tempBoard[availableMoves[i]] = currentPlayer;
+
+      if (Array.isArray(gameboard.checkWin(tempBoard, currentPlayer)) == true ) {
+        scores.push(assignWinLoss(currentPlayer, depth));
+        break;
+      }
+      else if (gameboard.checkDraw(tempBoard) == true) {
+        scores.push(0);
+        break;
+      }
+      else if (depth < 9) {
+        results = minMax(tempBoard, switchPlayer(currentPlayer), 
+          depth + 1, !isMax);
+        scores.push(results);
+      }
+      i = i + 1;
+    }
+    
+    if (depth == 0) {
+      return availableMoves[bestMovePos(scores)]
+    }
+    else if (isMax == true) 
+      return maxFinder(scores);
+    else 
+      return minFinder(scores);
+  }
+
+  const assignWinLoss = (player, depth) => {
+    if (player == token)
+      return 10 - depth; 
+    else 
+      return -10 + depth;
+  }
+
+  const maxFinder = (scores) => {
+    let maxScore = -99
+    for (let i = 0; i < scores.length; i++) {
+      if (scores[i] > maxScore) 
+        maxScore = scores[i];
+    }
+    return maxScore;
+  }
+
+  const minFinder = (scores) => {
+    let minScore = 99
+    for (let i = 0; i < scores.length; i++) {
+      if (scores[i] < minScore) 
+        minScore = scores[i];
+    }
+    return minScore;
+  }
+  
+  const bestMovePos = (scores) => {
+    let bestMove = -1;
+    for (let j = 0; j < scores.length; j++) {
+      if (scores[j] > bestMove)
+        bestMove = j;
+    } 
+    return bestMove;
+  }
+
+  const nextMove = () => {
+    return minMax(gameboard.display(), token, 0, true);
+  }
+
+  const possibleMoves = (board) => {
+    moveList = board.map((element, index) => {
+      return element == ' ' ? element = index : element = "D";
+    });
+    moveList = moveList.filter((element) => element != 'D')
+    return moveList;
+  }
+
+  return {name, token, isComputer, randomMove, minMax, nextMove, possibleMoves};
 }
 
 const gameController = (() => {
@@ -104,22 +193,34 @@ const gameController = (() => {
   let currentPlayer;
 
   const gameTurn = (pos) => {
-    if (gameboard.placeToken(currentPlayer.token(), pos) > -1) {
+    let success;
+    let difficulty = document.getElementById('comp_type').selectedOptions[0]
+      .value;
+      console.log(difficulty);
+    if (currentPlayer.isComputer == false)
+      success = gameboard.placeToken(currentPlayer.token, pos);
+    else if (difficulty == 'superhard')
+      success = gameboard.placeToken(currentPlayer.token, 
+        currentPlayer.nextMove())
+    else if (difficulty == 'supereasy')
+        success = gameboard.placeToken(currentPlayer.token, 
+          currentPlayer.randomMove(gameboard.display()));
+    if (success > -1) {
       if (gameOver() == false) {
-        currentPlayer.name() == player1.name() ? currentPlayer = player2 :
+        currentPlayer.name == player1.name ? currentPlayer = player2 :
           currentPlayer = player1;
-        setMessage(currentPlayer.name() + "\'s turn");
+        setMessage(currentPlayer.name + "\'s turn");
       }  
     }    
   }
 
   const gameOver = () => {
-    win = gameboard.checkWin(gameboard.display(), currentPlayer.token())
+    win = gameboard.checkWin(gameboard.display(), currentPlayer.token)
     if (win != false) {
       gameboard.disableBoard();
-      gameboard.colorWinner(win, currentPlayer.token());
+      gameboard.colorWinner(win, currentPlayer.token);
       toggleInputs();
-      setMessage(currentPlayer.name() + " wins!");
+      setMessage(currentPlayer.name + " wins!");
       return true;
     }
     else if (gameboard.checkDraw(gameboard.display()) == true) {
@@ -145,13 +246,12 @@ const gameController = (() => {
   }
 
   const startGame = () => {
-    isComputer1 = document.querySelector('#is_computer1').checked;
     isComputer2 = document.querySelector('#is_computer2').checked;
-    player1 = Player(grabName(1), 'X', isComputer1);
+    player1 = Player(grabName(1), 'X', false);
     player2 = Player(grabName(2), 'O', isComputer2);
     toggleInputs();
     resetGame();
-    setMessage(currentPlayer.name() + "\'s turn");
+    setMessage(currentPlayer.name + "\'s turn");
   }
 
   const grabName = (player) => {
@@ -168,7 +268,7 @@ const gameController = (() => {
 
   return {gameTurn, startGame}
 })();
-
+/*
 const computerPlayer = (() => {
   let computer = Player("AI Opponent", 'O', false);
 
@@ -259,13 +359,27 @@ const computerPlayer = (() => {
   return {minMax, nextMove, possibleMoves};
 
 })();
-
+*/
 document.addEventListener('click', function(e) {
+  //console.log(e);
   if (e.target.dataset.pos > -1 && e.target.dataset.game_on == "yes") {
     gameController.gameTurn(e.target.dataset.pos);
-    if (e.target.dataset.game_on == "yes")
-      gameController.gameTurn(computerPlayer.nextMove());
+    if (document.querySelector('#is_computer2').checked) {
+      setTimeout(function() {
+        gameController.gameTurn(e.target.dataset.pos);
+      }, 1000);
+    }
   }
   else if (e.target.className == 'start')
     gameController.startGame();
 });
+
+document.getElementById('is_computer2').onclick = function () {
+    let inputBox = document.querySelector('input#player2');
+    let selectBox = document.querySelector('select#comp_type')
+    console.log(selectBox);
+    inputBox.style.display == 'none' ? inputBox.style.display = 'inline-block'
+      : inputBox.style.display = 'none';
+    selectBox.style.display == 'inline-block' ? selectBox.style.display = 'none'
+      : selectBox.style.display = 'inline-block';
+  }

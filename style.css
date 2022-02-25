@@ -108,3 +108,9 @@ input[type='text'] {
   font-size: clamp(.75rem, 3vw, 1.4rem);
   width: clamp(150px, 37.5vw, 280px);
 }
+
+select {
+  display: none;
+  font-size: clamp(.75rem, 3vw, 1.4rem);
+  width: clamp(150px, 37.5vw, 288px);
+}
