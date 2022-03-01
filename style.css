@@ -16,7 +16,7 @@ h2 {
 }
 
 #gameboard {
-  display: grid;
+  display: none;
   grid: repeat(3, clamp(80px, 20vw, 150px)) / repeat(3, clamp(80px, 20vw, 150px));
   overflow: hidden;
 }
@@ -36,11 +36,11 @@ h2 {
   transition-duration: 0.25s;
 }
 
-#gameboard>div[data-token='X']{
+#gameboard>div[data-token='X'], label[for='token_x'] {
   color: rgb(238, 106, 45);
 }
 
-#gameboard>div[data-token='O']{
+#gameboard>div[data-token='O'], label[for='token_o']{
   color: rgb(97, 184, 255);
 }
 
@@ -63,15 +63,22 @@ h2 {
   transition-duration: 2s;
 }
 
-p {
+h1 {
   display: flex;
   justify-content: center;
   margin-bottom: 0;
   font-size: clamp(1rem, 4vw, 1.88rem);
+  font-weight: 500;
 }
 
 .button_area {
   display: flex;
+  justify-content: center;
+  margin-top: 0;
+}
+
+.new_game_buttons {
+  display: none;
   justify-content: center;
   margin-top: 0;
 }
@@ -90,10 +97,25 @@ ul > li > button{
   margin: 0;
 }
 
-button {
+li.token_select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+button.start {
   width: clamp(80px, 20vw, 150px);
   height: clamp(45px, 9vw, 67.5px);
   font-size: clamp(1.7rem, 6vw, 2.81rem);
+}
+
+button.new_game, button.play_again {
+  width: clamp(120px, 30vw, 225px);
+  height: clamp(45px, 9vw, 67.5px);
+  font-size: clamp(1.3rem, 5.2vw, 2.4rem);
+  margin: 10px 20px;
+  flex-shrink: 0;
 }
 
 label {
@@ -104,6 +126,15 @@ label {
   padding: 5px;
 }
 
+p.token_text {
+  display: inline-block;
+  width: clamp(70px, 17.8vw, 130px);
+  text-align: right;
+  font-size: clamp(.75rem, 3vw, 1.4rem);
+  padding: 5px;
+  margin: 0 5px 20px;
+}
+
 input[type='text'] {
   font-size: clamp(.75rem, 3vw, 1.4rem);
   width: clamp(150px, 37.5vw, 280px);
@@ -111,6 +142,12 @@ input[type='text'] {
 
 select {
   display: none;
-  font-size: clamp(.75rem, 3vw, 1.4rem);
+  font-size: clamp(.75rem, 3vw, 1.6rem);
   width: clamp(150px, 37.5vw, 288px);
+}
+
+input[type="radio"] {
+  -ms-transform: scale(2); /* IE 9 */
+  -webkit-transform: scale(2); /* Chrome, Safari, Opera */
+  transform: scale(2);
 }

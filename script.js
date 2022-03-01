@@ -1,7 +1,3 @@
-//Integrate the Player and computerPlayer function factories so Player has
-//access to the AI movefinding methods and the methods have accesss to the
-//current Player
-
 const gameboard = (() => {
   let board = Array.from(' '.repeat(9));
 
@@ -196,7 +192,6 @@ const gameController = (() => {
     let success;
     let difficulty = document.getElementById('comp_type').selectedOptions[0]
       .value;
-      console.log(difficulty);
     if (currentPlayer.isComputer == false)
       success = gameboard.placeToken(currentPlayer.token, pos);
     else if (difficulty == 'superhard')
@@ -219,14 +214,14 @@ const gameController = (() => {
     if (win != false) {
       gameboard.disableBoard();
       gameboard.colorWinner(win, currentPlayer.token);
-      toggleInputs();
+      toggleNewGameButtons();
       setMessage(currentPlayer.name + " wins!");
       return true;
     }
     else if (gameboard.checkDraw(gameboard.display()) == true) {
       gameboard.disableBoard();
-      toggleInputs();
       setMessage("It's a cat's game!");
+      toggleNewGameButtons();
       return true;
     }
     else 
@@ -234,29 +229,45 @@ const gameController = (() => {
   }
 
   const setMessage = (message) => {
-    document.querySelector('p').innerText = message;
+    document.querySelector('h1').innerText = message;
   }
 
   const toggleInputs = () => {
-    target = Array.from(document.getElementsByClassName('button_area'));
-    target.forEach(element => {
+    let inputs = Array.from(document.getElementsByClassName('button_area'));
+    inputs.forEach(element => {
       element.style.display == 'none' ? element.style.display = 'flex' :
         element.style.display = 'none';
     });
   }
 
+  const toggleBoard = () => {
+    let board = document.getElementById('gameboard')
+    board.style.display == 'grid' ? board.style.display = 'none' :
+      board.style.display = 'grid';
+  }
+
+  const toggleNewGameButtons = () => {
+    let buttons = document.querySelector('.new_game_buttons')
+    buttons.style.display == 'flex' ? buttons.style.display = 'none' :
+      buttons.style.display = 'flex';
+  }
+
   const startGame = () => {
     isComputer2 = document.querySelector('#is_computer2').checked;
     player1 = Player(grabName(1), 'X', false);
-    player2 = Player(grabName(2), 'O', isComputer2);
+    if (isComputer2 == false)
+      player2 = Player(grabName(2), 'O', isComputer2);
+    else 
+      player2 = Player('Computer Player', 'O', isComputer2)
     toggleInputs();
+    toggleBoard();
     resetGame();
     setMessage(currentPlayer.name + "\'s turn");
   }
 
   const grabName = (player) => {
     return document.querySelector('input#player' + player).value != "" ?
-      document.querySelector('input#player' + player).value : "Someone " 
+      document.querySelector('input#player' + player).value : "Player " 
       + player;
   }
 
@@ -264,122 +275,55 @@ const gameController = (() => {
     gameboard.clearBoard();
     gameboard.enableBoard();
     currentPlayer = player1;
+    if (document.querySelector('.new_game_buttons').style.display == 'flex') {
+      document.querySelector('.new_game_buttons').style.display = 'none';
+      setMessage(currentPlayer.name + "\'s turn");
+    }
   }
 
-  return {gameTurn, startGame}
+  const newGame = () => {
+    gameboard.clearBoard();
+    toggleInputs();
+    toggleBoard();
+    toggleNewGameButtons();
+    setMessage('Please enter your names, then press "Start"');
+  }
+
+
+  return {gameTurn, startGame, newGame, resetGame}
 })();
-/*
-const computerPlayer = (() => {
-  let computer = Player("AI Opponent", 'O', false);
 
-  const switchPlayer = (token) => token == 'X' ? 'O' : 'X';
-
-  const minMax = (board, currentPlayer, depth, isMax) => {
-    let scores = [];
-    let tempBoard;
-    let results;
-    let i = 0;
-    let availableMoves = possibleMoves(board);
-
-    while (i < availableMoves.length) {
-      tempBoard = [...board];
-      tempBoard[availableMoves[i]] = currentPlayer;
-
-      if (Array.isArray(gameboard.checkWin(tempBoard, currentPlayer)) == true ) {
-        scores.push(assignWinLoss(currentPlayer, depth));
-        break;
-      }
-      else if (gameboard.checkDraw(tempBoard) == true) {
-        scores.push(0);
-        break;
-      }
-      else if (depth < 9) {
-        results = minMax(tempBoard, switchPlayer(currentPlayer), 
-          depth + 1, !isMax);
-        scores.push(results);
-      }
-      i = i + 1;
-    }
-    
-    if (depth == 0) {
-      return availableMoves[bestMovePos(scores)]
-    }
-    else if (isMax == true) 
-      return maxFinder(scores);
-    else 
-      return minFinder(scores);
-  }
-
-  const assignWinLoss = (player, depth) => {
-    if (player == computer.token())
-      return 10 - depth; 
-    else 
-      return -10 + depth;
-  }
-
-  const maxFinder = (scores) => {
-    let maxScore = -99
-    for (let i = 0; i < scores.length; i++) {
-      if (scores[i] > maxScore) 
-        maxScore = scores[i];
-    }
-    return maxScore;
-  }
-
-  const minFinder = (scores) => {
-    let minScore = 99
-    for (let i = 0; i < scores.length; i++) {
-      if (scores[i] < minScore) 
-        minScore = scores[i];
-    }
-    return minScore;
-  }
-  
-  const bestMovePos = (scores) => {
-    let bestMove = -1;
-    for (let j = 0; j < scores.length; j++) {
-      if (scores[j] > bestMove)
-        bestMove = j;
-    } 
-    return bestMove;
-  }
-
-  const nextMove = () => {
-    return minMax(gameboard.display(), computer.token(), 0, true);
-  }
-
-  const possibleMoves = (board) => {
-    moveList = board.map((element, index) => {
-      return element == ' ' ? element = index : element = "D";
-    });
-    moveList = moveList.filter((element) => element != 'D')
-    return moveList;
-  }
-
-  return {minMax, nextMove, possibleMoves};
-
-})();
-*/
 document.addEventListener('click', function(e) {
   //console.log(e);
   if (e.target.dataset.pos > -1 && e.target.dataset.game_on == "yes") {
     gameController.gameTurn(e.target.dataset.pos);
     if (document.querySelector('#is_computer2').checked) {
+      gameboard.disableBoard();
       setTimeout(function() {
+        gameboard.enableBoard();
         gameController.gameTurn(e.target.dataset.pos);
-      }, 1000);
+      }, 500);
     }
   }
-  else if (e.target.className == 'start')
-    gameController.startGame();
 });
 
 document.getElementById('is_computer2').onclick = function () {
-    let inputBox = document.querySelector('input#player2');
-    let selectBox = document.querySelector('select#comp_type')
-    console.log(selectBox);
-    inputBox.style.display == 'none' ? inputBox.style.display = 'inline-block'
-      : inputBox.style.display = 'none';
-    selectBox.style.display == 'inline-block' ? selectBox.style.display = 'none'
-      : selectBox.style.display = 'inline-block';
-  }
+  let inputBox = document.querySelector('input#player2');
+  let selectBox = document.querySelector('select#comp_type')
+  inputBox.style.display == 'none' ? inputBox.style.display = 'inline-block'
+    : inputBox.style.display = 'none';
+  selectBox.style.display == 'inline-block' ? selectBox.style.display = 'none'
+    : selectBox.style.display = 'inline-block';
+}
+
+document.querySelector('.start').onclick = function() {
+  gameController.startGame();
+}
+
+document.querySelector('.new_game').onclick = function() {
+  gameController.newGame();
+}
+
+document.querySelector('.play_again').onclick = function() {
+  gameController.resetGame();
+}
